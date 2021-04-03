@@ -3,16 +3,8 @@ import { GraphQLServer } from "graphql-yoga";
 //Type definitions (scheme)
 const typeDefs = `
         type Query{
-           id:ID!
-           name:String!
-           age:Int!
-           employed:Boolean!
-           gpa:Float
-           title:String!
-           price:Float!
-           releaseYear:Int
-           rating:Float
-           inStock:Boolean!
+          me: User!
+          post:Post!
         }
 
         type User{
@@ -21,41 +13,33 @@ const typeDefs = `
           email:String!
           age:Int
         }
+
+        type Post{
+          id:ID!
+          title:String!
+          body:String!
+          published:Boolean!
+        }
     `;
 
 //Resolvers
 const resolvers = {
   Query: {
-    id() {
-      return "abc-343-234asdfs";
+    me() {
+      return {
+        id: "1233-fdasf334",
+        name: "Shiva",
+        email: "shiva@gmail.com",
+        age: 20,
+      };
     },
-    name() {
-      return "I'm Shivashankar here";
-    },
-    age() {
-      return 20;
-    },
-    employed() {
-      return true;
-    },
-    gpa() {
-      return 3.8;
-    },
-
-    title() {
-      return "Boat bass headset with Mic";
-    },
-    price() {
-      return 1200.12;
-    },
-    releaseYear() {
-      return 2021;
-    },
-    rating() {
-      return 4.8;
-    },
-    inStock() {
-      return true;
+    post() {
+      return {
+        id: "1233-fdas34433",
+        title: "Graphql course",
+        body: "by andrew mead",
+        published: true,
+      };
     },
   },
 };
