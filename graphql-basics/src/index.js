@@ -1,11 +1,30 @@
 import { GraphQLServer } from "graphql-yoga";
 
+const users = [
+  { id: "1", name: "Shivashankar", email: "shiva@gmail.com", age: 20 },
+  { id: "2", name: "karthik", email: "karthik@gmail.com", age: 23 },
+  { id: "3", name: "shankar", email: "shankar@gmail.com" },
+];
+
+const posts = [
+  { id: "4", title: "graphql course", body: "by andrew mead", published: true, author: "1" },
+  { id: "5", title: "graphql book", body: "by jon doe", published: true, author: "1" },
+  { id: "6", title: "express", body: "by andrew mead", published: false, author: "2" },
+];
+
+const comments = [
+  { id: "21", text: "javascript", author: "1" },
+  { id: "22", text: "Node", author: "2" },
+  { id: "23", text: "GraphQl", author: "2" },
+  { id: "24", text: "Apollo", author: "3" },
+];
+
 //Type definitions (scheme)
 const typeDefs = `
         type Query{
-          add(numbers: [Float!]): Float!
-          greeting(name: String, position: String): String!
-          grades:[Int!]!
+          users(query: String):[User!]!
+          posts(query: String):[Post!]!
+          comments:[Comment]!
           me: User!
           post:Post!
         }
@@ -15,6 +34,8 @@ const typeDefs = `
           name:String!
           email:String!
           age:Int
+          posts:[Post!]!
+          comments:[Comment!]!
         }
 
         type Post{
@@ -22,22 +43,36 @@ const typeDefs = `
           title:String!
           body:String!
           published:Boolean!
+          author:User!
+        }
+
+        type Comment{
+          id:ID!
+          text:String!
+          author:User!
         }
     `;
 
 //Resolvers
 const resolvers = {
   Query: {
-    grades(parent, args, ctx, info) {
-      return [90, 98, 99];
+    users(parent, args, ctx, info) {
+      if (!args.query) return users;
+
+      return users.filter((user) => user.name.toLowerCase().includes(args.query.toLowerCase()));
     },
-    add(parent, args, ctx, info) {
-      if (args.numbers.length === 0) return 0;
-      return args.numbers.reduce((a, b) => a + b);
+    posts(parent, args, ctx, info) {
+      if (!args.query) return posts;
+
+      return posts.filter((post) => {
+        const title = post.title.split(" ");
+        const body = post.body.split(" ");
+        const isContain = [...title, ...body].includes(args.query);
+        if (isContain) return post;
+      });
     },
-    greeting(parent, args, ctx, info) {
-      if (args.name && args.position) return `Hello ${args.name} working as a ${args.position}`;
-      else return "hello";
+    comments(parent, args, ctx, info) {
+      return comments;
     },
     me() {
       return {
@@ -54,6 +89,27 @@ const resolvers = {
         body: "by andrew mead",
         published: true,
       };
+    },
+  },
+  Post: {
+    author(parent, args, ctx, info) {
+      return users.find((user) => user.id === parent.author);
+    },
+  },
+
+  User: {
+    posts(parent, args, ctx, info) {
+      return posts.filter((post) => post.author === parent.id);
+    },
+
+    comments(parent, args, ctx, info) {
+      return comments.filter((comment) => comment.author === parent.author);
+    },
+  },
+
+  Comment: {
+    author(parent, args, ctx, info) {
+      return users.find((user) => user.id === parent.author);
     },
   },
 };
