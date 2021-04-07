@@ -15,6 +15,10 @@ const Mutation = {
     return user;
   },
 
+  updateUser(parent, args, { db }, info) {
+    
+  },
+
   deleteUser(parent, args, { db }, info) {
     const userIndex = db.users.findIndex((user) => user.id === args.id);
 
